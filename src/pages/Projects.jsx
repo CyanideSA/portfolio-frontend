@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import SectionTitle from "../components/SectionTitle.jsx";
 import ProjectCard from "../components/ProjectCard.jsx";
-import { getProjects } from "../api/Client.js";
+import { getProjects } from "../api/client.js";
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
