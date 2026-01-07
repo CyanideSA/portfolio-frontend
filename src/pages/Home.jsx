@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import GlassCard from "../components/GlassCard.jsx";
 import SectionTitle from "../components/SectionTitle.jsx";
-import { getProfile } from "../api/Client.js";
+import { getProfile } from "../api/client.js";
 
 export default function Home() {
   const [profile, setProfile] = useState(null);
