@@ -15,7 +15,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="space-y-10">
+    <div className="page space-y-10">
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -29,14 +29,25 @@ export default function Home() {
 
         <GlassCard className="p-6">
           <p className="text-white/70 leading-relaxed">
-            {err ? err : profile?.bio ?? "Please ensure backend is running and /api/profile returns JSON."}
+            {err
+              ? err
+              : profile?.bio ??
+                "Please ensure backend is running and /api/profile returns JSON."}
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <span className="text-xs rounded-full bg-white/10 px-3 py-1">Java</span>
-            <span className="text-xs rounded-full bg-white/10 px-3 py-1">Spring Boot</span>
-            <span className="text-xs rounded-full bg-white/10 px-3 py-1">React</span>
-            <span className="text-xs rounded-full bg-white/10 px-3 py-1">MySQL</span>
+            <span className="text-xs rounded-full bg-white/10 px-3 py-1">
+              Java
+            </span>
+            <span className="text-xs rounded-full bg-white/10 px-3 py-1">
+              Spring Boot
+            </span>
+            <span className="text-xs rounded-full bg-white/10 px-3 py-1">
+              React
+            </span>
+            <span className="text-xs rounded-full bg-white/10 px-3 py-1">
+              MySQL
+            </span>
           </div>
         </GlassCard>
       </motion.div>

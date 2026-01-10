@@ -27,7 +27,7 @@ export default function Contact() {
   }
 
   return (
-    <div>
+    <div className="page space-y-6">
       <SectionTitle
         eyebrow="CONTACT"
         title="Let’s talk"
@@ -39,16 +39,24 @@ export default function Contact() {
           <div className="text-sm text-white/70">Direct</div>
 
           <p className="text-white/70">
-            Email: {" "}
-            <a className="text-white hover:underline" href={profile?.email ? `mailto:${profile.email}` : "#"}>
+            Email:{" "}
+            <a
+              className="text-white hover:underline"
+              href={profile?.email ? `mailto:${profile.email}` : "#"}
+            >
               {profile?.email ?? "(connect backend to load)"}
             </a>
           </p>
 
           <p className="text-white/70">
-            GitHub: {" "}
+            GitHub:{" "}
             {profile?.github ? (
-              <a className="text-white hover:underline" href={profile.github} target="_blank" rel="noreferrer">
+              <a
+                className="text-white hover:underline"
+                href={profile.github}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {profile.github.replace(/^https?:\/\//, "")}
               </a>
             ) : (
@@ -57,9 +65,14 @@ export default function Contact() {
           </p>
 
           <p className="text-white/70">
-            LinkedIn: {" "}
+            LinkedIn:{" "}
             {profile?.linkedin ? (
-              <a className="text-white hover:underline" href={profile.linkedin} target="_blank" rel="noreferrer">
+              <a
+                className="text-white hover:underline"
+                href={profile.linkedin}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {profile.linkedin.replace(/^https?:\/\//, "")}
               </a>
             ) : (
@@ -94,12 +107,14 @@ export default function Contact() {
               onChange={(e) => setForm({ ...form, message: e.target.value })}
               required
             />
+
             <button
               className="rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 px-4 py-2"
               type="submit"
             >
               Send
             </button>
+
             {status && <div className="text-sm text-white/70">{status}</div>}
           </form>
         </GlassCard>

@@ -15,7 +15,7 @@ export default function Projects() {
   }, []);
 
   return (
-    <div>
+    <div className="page">
       <SectionTitle
         eyebrow="WORK"
         title="Projects"
@@ -31,7 +31,9 @@ export default function Projects() {
         className="grid grid-cols-1 md:grid-cols-2 gap-5"
       >
         {projects.length === 0 ? (
-          <p className="text-white/60">No projects found. Add some in DB or via Admin API.</p>
+          <p className="text-white/60">
+            No projects found. Add some in DB or via Admin API.
+          </p>
         ) : (
           projects.map((p) => <ProjectCard key={p.id ?? p.title} project={p} />)
         )}

@@ -2,16 +2,337 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base page look */
+/* ---------------- GLOBAL ---------------- */
 :root {
   color-scheme: dark;
+  --pad: 18px;
+
+  /* ✅ set from App via style={{ "--app-bg": `url(${suvoPhoto})` }} */
+  --app-bg: none;
 }
+
+* { box-sizing: border-box; }
 
 html, body, #root {
   height: 100%;
+  margin: 0;
 }
 
 body {
-  margin: 0;
-  background: #070A12; /* ambient dark */
+  background: #000;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+  /* ✅ hides the “outside half” of edge buttons */
+  overflow-x: hidden;
+}
+
+/* ---------------- APP BACKGROUND (BLUR PHOTO) ---------------- */
+.appRoot {
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ✅ Global background photo (blurred) */
+.appRoot::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+
+  background-image: var(--app-bg);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  /* ✅ "50% blurry" feel */
+  transform: scale(1.10);
+  filter: blur(12px) saturate(1.05) contrast(1.05);
+  opacity: 0.95;
+}
+
+/* dark tint over background */
+.appRoot::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(circle at center, rgba(0,0,0,.25), rgba(0,0,0,.78));
+}
+
+/* everything above background */
+.welcomePanel,
+.siteShell,
+.waterNav {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------------- WELCOME PANEL ---------------- */
+.welcomePanel {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 500ms ease, opacity 500ms ease;
+}
+
+.welcomePanel.hide {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.welcomeShade {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0,0,0,.25), rgba(0,0,0,.75));
+}
+
+.welcomeCenter {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.welcomeCard {
+  width: min(520px, 92vw);
+  padding: 22px 22px 18px;
+  border-radius: 26px;
+  background: rgba(10,10,10,.45);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  text-align: center;
+}
+
+.welcomeEmoji { font-size: 44px; margin-bottom: 8px; }
+.welcomeTitle { margin: 0 0 8px; font-size: clamp(24px, 4vw, 34px); }
+.welcomeName { margin: 0; font-size: 18px; opacity: .9; }
+.welcomeSmiley { margin-top: 10px; font-size: 22px; opacity: .9; }
+
+.welcomeHintBtn {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(255,255,255,.10);
+  color: rgba(255,255,255,.92);
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease;
+}
+.welcomeHintBtn:hover { transform: translateY(-1px); }
+.welcomeHintBtn:active { transform: translateY(0); }
+
+/* ---------------- SITE BEHIND WELCOME ---------------- */
+.siteShell {
+  height: 100%;
+  position: relative;
+
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.siteShell.entered {
+  opacity: 1;
+}
+
+.pageStage {
+  height: 100%;
+  background: rgba(0,0,0,0.35);
+  padding: 72px 18px 18px;
+  overflow: auto;
+}
+
+.pageMotion { min-height: calc(100vh - 90px); }
+
+/* ---------------- PAGES ---------------- */
+.page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+h2 { margin: 0 0 12px; font-size: 28px; }
+
+.card {
+  border-radius: 22px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.muted { opacity: .75; }
+.link { color: #fff; opacity: .9; text-decoration: underline; }
+
+.form { display: grid; gap: 10px; }
+input, textarea {
+  width: 100%;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.25);
+  color: #fff;
+  outline: none;
+}
+
+.primary {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 0;
+  background: rgba(255,255,255,.18);
+  color: #fff;
+  cursor: pointer;
+}
+
+/* ---------------- EDGE NAV (YOUR FINAL BEHAVIOR) ---------------- */
+.waterNav {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+}
+
+/*
+  REST (not tapped):
+  - black 50% transparent
+  - no shadow
+  - only initial
+  - half outside edge
+
+  ARMED (tapped once):
+  - slides inside
+  - background becomes 100% black (NOT transparent)
+  - shadow appears
+  - initial stays visible
+  - full-name bubble pops out on the side
+*/
+.edgeBtn {
+  position: fixed;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 14px;
+
+  background: rgba(0,0,0,0.50); /* ✅ rest */
+  box-shadow: none;             /* ✅ rest */
+
+  display: grid;
+  place-items: center;
+
+  transition:
+    transform 240ms cubic-bezier(.2,.9,.2,1),
+    background 220ms ease,
+    box-shadow 220ms ease;
+}
+
+/* tap feel */
+.edgeBtn:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+/* Initial always visible */
+.edgeInitial {
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Full name bubble (hidden by default) */
+.edgeLabel {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) translateX(8px) scale(0.98);
+  opacity: 0;
+  pointer-events: none;
+
+  padding: 9px 12px;
+  border-radius: 14px;
+
+  background: rgba(0,0,0,0.70);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #fff;
+  font-weight: 700;
+  white-space: nowrap;
+
+  box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+/* show bubble only when armed */
+.edgeBtn.armed .edgeLabel {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0) scale(1);
+}
+
+/* ARMED: slide inside + background 100% black + shadow appears */
+.edgeBtn.armed {
+  background: rgba(0,0,0,1); /* ✅ armed: 100% black */
+  box-shadow: 0 18px 50px rgba(0,0,0,0.60); /* ✅ armed: shadow */
+}
+
+/* Positions (your config values) */
+.edgeBtn.topLeft     { top: var(--pad); left: var(--pad); }
+.edgeBtn.topRight    { top: var(--pad); right: var(--pad); }
+.edgeBtn.bottomLeft  { bottom: var(--pad); left: var(--pad); }
+.edgeBtn.bottomRight { bottom: var(--pad); right: var(--pad); }
+.edgeBtn.middleLeft  { top: 50%; left: var(--pad); }
+
+/* REST: half outside edge illusion (outside clipped by overflow-x hidden) */
+.edgeBtn.topLeft,
+.edgeBtn.bottomLeft { transform: translateX(-26px); }
+
+.edgeBtn.topRight,
+.edgeBtn.bottomRight { transform: translateX(26px); }
+
+.edgeBtn.middleLeft { transform: translate(-26px, -50%); }
+
+/* ARMED: slide inside near edge */
+.edgeBtn.armed.topLeft,
+.edgeBtn.armed.bottomLeft { transform: translateX(0); }
+
+.edgeBtn.armed.topRight,
+.edgeBtn.armed.bottomRight { transform: translateX(0); }
+
+.edgeBtn.armed.middleLeft { transform: translate(0, -50%); }
+
+/* Bubble direction (left side -> bubble to the right) */
+.edgeBtn.topLeft .edgeLabel,
+.edgeBtn.bottomLeft .edgeLabel,
+.edgeBtn.middleLeft .edgeLabel {
+  left: 54px;
+  right: auto;
+}
+
+/* Bubble direction (right side -> bubble to the left) */
+.edgeBtn.topRight .edgeLabel,
+.edgeBtn.bottomRight .edgeLabel {
+  right: 54px;
+  left: auto;
+  transform: translateY(-50%) translateX(-8px) scale(0.98);
+}
+
+.edgeBtn.armed.topRight .edgeLabel,
+.edgeBtn.armed.bottomRight .edgeLabel {
+  transform: translateY(-50%) translateX(0) scale(1);
 }
