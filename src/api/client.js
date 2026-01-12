@@ -1,27 +1,43 @@
 import axios from "axios";
 
 /**
- * Vite env var (recommended):
- *   VITE_API_BASE_URL=https://portfolio-f91h.onrender.com/api
- *
- * Fallback:
- *   https://portfolio-f91h.onrender.com/api
+ * PROD (Vercel): set VITE_API_BASE_URL=https://portfolio-f91h.onrender.com
+ * DEV (localhost): leave it unset → uses "/api" (vite proxy)
  */
-const FALLBACK_API = "https://portfolio-f91h.onrender.com/api";
 
-// If you set VITE_API_BASE_URL, we use it. Otherwise use Render fallback.
-let baseURL = import.meta.env?.VITE_API_BASE_URL || FALLBACK_API;
+const PROD_FALLBACK_ORIGIN = "https://portfolio-f91h.onrender.com";
 
-// Normalize: remove trailing slash (avoids // in requests)
-baseURL = baseURL.replace(/\/+$/, "");
+const isDev = import.meta.env.DEV;
 
-// Normalize: ensure it ends with /api (avoid missing api or double api)
-if (!baseURL.endsWith("/api")) baseURL += "/api";
+// If env is set, treat it as an ORIGIN (no /api) OR full /api URL
+let raw = import.meta.env?.VITE_API_BASE_URL || (isDev ? "" : PROD_FALLBACK_ORIGIN);
+raw = (raw || "").replace(/\/+$/, ""); // trim trailing slashes
+
+let baseURL;
+
+// DEV: use proxy
+if (isDev) {
+  baseURL = "/api";
+} else {
+  // PROD: allow both styles:
+  // - https://domain.com
+  // - https://domain.com/api
+  baseURL = raw.endsWith("/api") ? raw : `${raw}/api`;
+}
 
 export const api = axios.create({
   baseURL,
-  timeout: 10000,
+  timeout: 15000,
+  withCredentials: false,
 });
+
+export function setAdminAuth(basicAuth) {
+  if (basicAuth) {
+    api.defaults.headers.common.Authorization = basicAuth;
+  } else {
+    delete api.defaults.headers.common.Authorization;
+  }
+}
 
 // Public endpoints
 export const getProfile = () => api.get("/profile");
@@ -29,6 +45,9 @@ export const getProjects = () => api.get("/projects");
 export const sendContactMessage = (payload) => api.post("/contact", payload);
 
 // Admin endpoints (Basic Auth)
+export const adminPing = (basicAuth) =>
+  api.get("/admin/ping", { headers: { Authorization: basicAuth } });
+
 export const adminUpdateProfile = (profile, basicAuth) =>
   api.put("/admin/profile", profile, { headers: { Authorization: basicAuth } });
 
