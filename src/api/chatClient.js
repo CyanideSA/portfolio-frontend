@@ -12,7 +12,7 @@ import { Client } from "@stomp/stompjs";
 export function createStompClient({ onConnected, onPresence, authHeader } = {}) {
   const isDev = import.meta.env.DEV;
 
-  const HTTP_WS_URL = isDev
+  const HTTP_BASE = isDev
     ? "/ws"
     : (import.meta.env?.VITE_WS_URL || "https://portfolio-f91h.onrender.com/ws");
 
@@ -20,20 +20,23 @@ export function createStompClient({ onConnected, onPresence, authHeader } = {}) 
   const saved = sessionStorage.getItem("admin_basic_auth");
   const effectiveAuth = authHeader || saved || "";
 
-  // ✅ Convert http(s) endpoint -> ws(s) endpoint for native WebSocket
-  const NATIVE_WS_URL = !isDev
-    ? HTTP_WS_URL.replace(/^https?:\/\//, (m) => (m === "https://" ? "wss://" : "ws://"))
+ // ✅ For Spring SockJS endpoint, native WebSocket is /ws/websocket
+  const HTTP_NATIVE = isDev ? null : `${HTTP_BASE.replace(/\/$/, "")}/websocket`;
+  
+   // ✅ Convert http(s) -> ws(s)
+  const WS_NATIVE = !isDev
+    ? HTTP_NATIVE.replace(/^https?:\/\//, (m) => (m === "https://" ? "wss://" : "ws://"))
     : null;
 
   const client = new Client({
     webSocketFactory: () => {
-      // ✅ DEV: SockJS (uses /ws/info etc — fine behind Vite proxy)
+      // DEV: SockJS behind Vite proxy (works great locally)
       if (isDev) {
-        return new SockJS(HTTP_WS_URL, null, { withCredentials: false });
+        return new SockJS(HTTP_BASE, null, { withCredentials: false });
       }
 
-      // ✅ PROD: Native WS (no /ws/info request, avoids your CORS error)
-      return new WebSocket(NATIVE_WS_URL);
+      // PROD: native ws to /ws/websocket (no SockJS /info XHR)
+      return new WebSocket(WS_NATIVE);
     },
 
     reconnectDelay: 2000,
