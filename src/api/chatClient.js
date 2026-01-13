@@ -4,11 +4,15 @@ import { Client } from "@stomp/stompjs";
 /**
  * DEV: "/ws" (Vite proxy -> http://localhost:8081/ws)
  * PROD: VITE_WS_URL or Render URL
+ *
+ * FIX:
+ * - DEV uses SockJS (works with Vite proxy)
+ * - PROD uses native WebSocket (prevents SockJS /ws/info XHR -> fixes CORS)
  */
 export function createStompClient({ onConnected, onPresence, authHeader } = {}) {
   const isDev = import.meta.env.DEV;
 
-  const WS_URL = isDev
+  const HTTP_WS_URL = isDev
     ? "/ws"
     : (import.meta.env?.VITE_WS_URL || "https://portfolio-f91h.onrender.com/ws");
 
@@ -16,8 +20,21 @@ export function createStompClient({ onConnected, onPresence, authHeader } = {}) 
   const saved = sessionStorage.getItem("admin_basic_auth");
   const effectiveAuth = authHeader || saved || "";
 
+  // ✅ Convert http(s) endpoint -> ws(s) endpoint for native WebSocket
+  const NATIVE_WS_URL = !isDev
+    ? HTTP_WS_URL.replace(/^https?:\/\//, (m) => (m === "https://" ? "wss://" : "ws://"))
+    : null;
+
   const client = new Client({
-    webSocketFactory: () => new SockJS(WS_URL, null, { withCredentials: false }),
+    webSocketFactory: () => {
+      // ✅ DEV: SockJS (uses /ws/info etc — fine behind Vite proxy)
+      if (isDev) {
+        return new SockJS(HTTP_WS_URL, null, { withCredentials: false });
+      }
+
+      // ✅ PROD: Native WS (no /ws/info request, avoids your CORS error)
+      return new WebSocket(NATIVE_WS_URL);
+    },
 
     reconnectDelay: 2000,
     heartbeatIncoming: 10000,
@@ -30,6 +47,7 @@ export function createStompClient({ onConnected, onPresence, authHeader } = {}) 
   });
 
   client.onConnect = () => {
+    // subscribe presence on connect
     try {
       client.subscribe("/topic/presence", (frame) => {
         try {
